@@ -1,0 +1,33 @@
+{
+  "name": "streaming-handlebars",
+  "version": "1.0.0",
+  "description": "",
+  "main": "streaming-handlebars.js",
+  "dependencies": {},
+  "devDependencies": {
+    "babel-core": "^6.10.4",
+    "babel-loader": "^6.2.4",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.10.3",
+    "del": "^2.2.1",
+    "gulp": "github:gulpjs/gulp#4.0",
+    "gulp-util": "^3.0.7",
+    "handlebars": "git+https://github.com/jakearchibald/handlebars.js.git",
+    "webpack": "^1.13.1",
+    "webpack-dev-server": "^1.14.1",
+    "webpack-stream": "^3.2.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "serve": "gulp serve"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jakearchibald/streaming-handlebars.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jakearchibald/streaming-handlebars/issues"
+  },
+  "homepage": "https://github.com/jakearchibald/streaming-handlebars#readme"
+}

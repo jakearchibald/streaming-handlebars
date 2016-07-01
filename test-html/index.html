@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Streaming handlebars test</title>
+  <style>
+    pre {
+      border: 1px dotted #ccc;
+      background: #efefef;
+      padding: 0.7em 1em;
+    }
+  </style>
+</head>
+<body>
+  Check out the streaming:
+  <pre class="output"></pre>
+  <script src="js/index.js"></script>
+  <script>{
+    // some helpers
+    function wait(ms) {
+      return new Promise(r => setTimeout(r, ms));
+    }
+
+    function charAtATime(str) {
+      const ittr = str[Symbol.iterator]();
+
+      return new ReadableStream({
+        pull(controller) {
+          return wait(50).then(() => {
+            const result = ittr.next();
+            if (result.done) {
+              controller.close();
+              return;
+            }
+            controller.enqueue(result.value);
+          })
+        }
+      });
+    }
+
+    function decodeTextStream(stream) {
+      // oh how I long for piping
+      const decoder = new TextDecoder();
+      const reader = stream.getReader();
+      return new ReadableStream({
+        pull(controller) {
+          return reader.read().then(result => {
+            if (result.done) {
+              controller.close();
+              return;
+            }
+            controller.enqueue(
+              decoder.decode(result.value, {stream: true})
+            );
+          })
+        }
+      })
+    }
+
+    // Now some template:
+
+    const context = {
+      prom: wait(2000).then(() => "World"),
+      promStream: wait(3000).then(() => charAtATime('stream')),
+      htmlPromStream: wait(4000).then(() => charAtATime('<escaping>')),
+      htmlStream: charAtATime(`<b>don't</b> <i>want</i> it to`),
+      pageStream: fetch('./').then(r => decodeTextStream(r.body)),
+      showSource: wait(5000).then(() => !!Math.round(Math.random()))
+    }
+
+    const templateStr =
+`Hello {{prom}}.
+Parts of this are from a {{promStream}}.
+It also does {{htmlPromStream}}.
+Unless you {{{htmlStream}}}.
+
+At this point, I randomly decide to show the page source.
+
+{{#if showSource}}
+{{{pageStream}}}
+{{else}}
+But not this time.
+{{/if}}`;
+
+    const template = Handlebars.compile(templateStr, {stream:true});
+    const stream = template(context);
+    const reader = stream.getReader();
+    const output = document.querySelector('.output');
+
+    reader.read().then(function process(result) {
+      if (result.done) return;
+      output.appendChild(new Text(result.value));
+      return reader.read().then(process);
+    }).then(() => {
+      console.log('Stream complete');
+    });
+  }</script>
+</body>
+</html>
