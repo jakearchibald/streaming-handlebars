@@ -1,6 +1,7 @@
 const gulp = require('gulp');
 const gutil = require('gulp-util');
 const webpack = require('webpack');
+const webpackStream = require('webpack-stream');
 const WebpackDevServer = require('webpack-dev-server');
 const del = require('del');
 const path = require('path');
@@ -29,6 +30,25 @@ const webpackOpts = {
     }
   }
 };
+
+function clean() {
+  return del(['dist']);
+}
+
+function copy() {
+  return gulp.src('test-html/**')
+    .pipe(gulp.dest('dist/'));
+}
+
+function js() {
+  return gulp.src('lib/index.js')
+    .pipe(webpackStream(webpackOpts))
+    .pipe(gulp.dest('dist/js/'));
+}
+
+gulp.task("build", gulp.series(clean,
+  gulp.parallel(copy, js)
+));
 
 gulp.task("serve", () => {
   // Start a webpack-dev-server
