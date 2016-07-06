@@ -56,6 +56,12 @@
       })
     }
 
+    const emptyStream = new ReadableStream({
+      start(controller) {
+        controller.close();
+      }
+    });
+
     // Now some template:
 
     const context = {
@@ -64,7 +70,8 @@
       htmlPromStream: wait(4000).then(() => charAtATime('<escaping>')),
       htmlStream: charAtATime(`<b>don't</b> <i>want</i> it to`),
       pageStream: fetch('./').then(r => decodeTextStream(r.body)),
-      showSource: wait(5000).then(() => !!Math.round(Math.random()))
+      showSource: wait(5000).then(() => !!Math.round(Math.random())),
+      emptyStream: wait(1000).then(() => emptyStream)
     }
 
     const templateStr =
@@ -72,6 +79,9 @@
 Parts of this are from a {{promStream}}.
 It also does {{htmlPromStream}}.
 Unless you {{{htmlStream}}}.
+
+{{#if pageStream}}Non-empty stream are thuthy{{else}}FAIL{{/if}}.
+{{#unless emptyStream}}Empty stream are false{{else}}FAIL{{/unless}}.
 
 At this point, I randomly decide to show the page source.
 
